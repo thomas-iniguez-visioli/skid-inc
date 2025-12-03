@@ -67,8 +67,8 @@
       "!test-*.js",
       "!test-*.html",
       "!netlify.toml",
-      "!.eslintrc","favicon.png"
-
+      "!.eslintrc",
+      "favicon.png"
     ],
     "extraResources": [
       {

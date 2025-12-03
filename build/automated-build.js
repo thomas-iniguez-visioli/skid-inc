@@ -36,15 +36,22 @@ class AutomatedBuilder {
     this.buildLog.push(logEntry);
   }
 
-  async executeCommand(command, options = {}) {
-    this.log(`Executing: ${command}`);
+  executeCommand(command, options = {}) {
+    this.log(`Executing: "${command}"`);
     try {
-      const result = execSync(command, { 
+      const execOptions = { 
         encoding: 'utf8', 
         stdio: options.captureOutput ? 'pipe' : 'inherit',
         maxBuffer: 1024 * 1024 * 10, // 10MB buffer
-        ...options
-      });
+        shell: true, // Important for cross-platform compatibility
+        cwd: process.cwd() // Ensure working directory is set
+      };
+
+      // Remove the captureOutput option from execOptions to avoid passing it to execSync
+      const { captureOutput, ...restOptions } = options;
+      Object.assign(execOptions, restOptions);
+      
+      const result = execSync(command, execOptions);
       
       if (options.captureOutput) {
         // Log each line of output
@@ -81,7 +88,7 @@ class AutomatedBuilder {
     
     // Check npm version
     try {
-      const npmVersion = await this.executeCommand('npm --version');
+      const npmVersion = this.executeCommand('npm --version', { captureOutput: true });
       this.log(`npm version: ${npmVersion.trim()}`);
     } catch (error) {
       throw new Error('npm not found. Please install Node.js and npm.');
@@ -89,7 +96,7 @@ class AutomatedBuilder {
 
     // Check electron-builder
     try {
-      await this.executeCommand('npx electron-builder --version');
+      this.executeCommand('npx electron-builder --version', { captureOutput: true });
       this.log('electron-builder is available');
     } catch (error) {
       throw new Error('electron-builder not found. Run npm install first.');
@@ -97,7 +104,7 @@ class AutomatedBuilder {
 
     // Check Git (for build metadata)
     try {
-      const gitVersion = await this.executeCommand('git --version');
+      const gitVersion = this.executeCommand('git --version', { captureOutput: true });
       this.log(`Git version: ${gitVersion.trim()}`);
     } catch (error) {
       this.log('Git not found - build metadata will be limited', 'warn');
@@ -147,13 +154,13 @@ class AutomatedBuilder {
 
   async installDependencies() {
     this.log('Installing/updating dependencies...');
-    await this.executeCommand('npm ci');
+    this.executeCommand('npm ci');
     this.log('Dependencies installed successfully');
   }
 
   async runPreBuild() {
     this.log('Running pre-build tasks...');
-    await this.executeCommand('npm run prebuild');
+    this.executeCommand('npm run prebuild');
     this.log('Pre-build tasks completed');
   }
 
@@ -194,7 +201,7 @@ class AutomatedBuilder {
     const buildStart = Date.now();
     try {
       // Capture full console output during build
-      await this.executeCommand(buildCommand, { captureOutput: true });
+      this.executeCommand(buildCommand, { captureOutput: true });
       const buildTime = Date.now() - buildStart;
       
       this.log(`Platform ${platform} built successfully in ${Math.round(buildTime / 1000)}s`);
