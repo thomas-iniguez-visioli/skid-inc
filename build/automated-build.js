@@ -9,7 +9,7 @@ const { execSync, spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-
+require('dotenv').config();
 class AutomatedBuilder {
   constructor() {
     this.startTime = Date.now();
@@ -25,7 +25,7 @@ class AutomatedBuilder {
       platforms: process.env.BUILD_PLATFORMS ? process.env.BUILD_PLATFORMS.split(',') : ['current'],
       outputDir: 'dist',
       logFile: `build-${Date.now()}.log`,
-      skipSigning: process.env.NODE_ENV === 'development' || process.env.SKIP_SIGNING === 'true'
+      skipSigning: true
     };
   }
 
