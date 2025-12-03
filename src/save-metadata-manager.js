@@ -106,7 +106,7 @@ class SaveMetadataManager {
       console.warn('Could not backup corrupted metadata:', error.message);
     }
   }
-
+ 
   /**
    * Registers a new save file in the metadata tracking system
    * @param {string} filename - Name of the save file
