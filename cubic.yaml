@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=https://cubic.dev/schema/cubic-repository-config.schema.json
+
+# cubic.yaml
+# This file configures AI review behavior, ignore patterns, PR descriptions, and custom rules.
+# Place this file in your repository root to version-control your AI review settings.
+# Settings defined here take precedence over UI-configured settings.
+# See https://docs.cubic.dev/configure/cubic-yaml for documentation.
+
+version: 1
+reviews:
+  enabled: true
+  sensitivity: high
+  incremental_commits: true
+  show_ai_feedback_buttons: true
+  custom_instructions: create fix without ask
+  custom_rules:
+    - name: GDPR / CCPA Right-to-Erasure Coverage
+      description: When new personal data fields are introduced, ensure they are tagged with data-classification metadata, enrolled in the privacy deletion queue, and covered by automated export/delete flows. Flag migrations or API responses exposing user_* PII that do not register retention periods or update privacy deletion playbooks.
+pr_descriptions:
+  generate: true
+issues:
+  fix_with_cubic_buttons: true
+
+# -----------------------------------------------------------------------------
+# Sample configuration (commented out). Uncomment the sections you need.
+# -----------------------------------------------------------------------------
+# version: 1
+# reviews:
+#   enabled: true
+#   sensitivity: medium
+#   incremental_commits: true
+#   show_ai_feedback_buttons: true
+#   custom_instructions: "Add any reviewer guidance here."
+#   ignore:
+#     files:
+#       - docs/**
+#       - "**/*.md"
+#     head_branches:
+#       - feature/*
+#     base_branches:
+#       - release/*
+#     pr_labels:
+#       - WIP
+#     pr_titles:
+#       - "draft:*"
+#   custom_rules:
+#     - name: Example rule name
+#       description: Explain what should be enforced.
+#       include:
+#         - "src/**/*.ts"
+#       exclude:
+#         - "**/*.spec.ts"
+# pr_descriptions:
+#   generate: true
+#   instructions: "Summaries should highlight risk and testing steps."
+# issues:
+#   fix_with_cubic_buttons: true
