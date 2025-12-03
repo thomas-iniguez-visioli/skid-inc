@@ -5,7 +5,7 @@
  * Handles deployment to various platforms and services
  */
 
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
@@ -35,13 +35,13 @@ class DeploymentManager {
     this.deployLog.push(logEntry);
   }
 
-  async executeCommand(command, options = {}) {
-    this.log(`Executing: ${command}`);
+  async executeCommand(command, args = [], options = {}) {
+    this.log(`Executing: ${command} ${args.map(a => JSON.stringify(a)).join(' ')}`);
     try {
-      const result = execSync(command, { 
-        encoding: 'utf8', 
+      const result = execFileSync(command, args, {
+        encoding: 'utf8',
         stdio: 'pipe',
-        ...options 
+        ...options
       });
       return result;
     } catch (error) {
@@ -265,7 +265,7 @@ Download the \`.dmg\` file and drag the app to your Applications folder.
 
     try {
       // Check if AWS CLI is available
-      await this.executeCommand('aws --version');
+      await this.executeCommand('aws', ['--version']);
     } catch (error) {
       throw new Error('AWS CLI not found. Please install it first.');
     }
@@ -276,7 +276,17 @@ Download the \`.dmg\` file and drag the app to your Applications folder.
       const s3Key = `${bucketPrefix}/v${this.config.version}/${artifact.name}`;
       this.log(`Uploading ${artifact.name} to s3://${bucketName}/${s3Key}...`);
       
-      await this.executeCommand(`aws s3 cp "${artifact.path}" "s3://${bucketName}/${s3Key}" --metadata "version=${this.config.version},checksum=${artifact.checksum}"`);
+      await this.executeCommand(
+        'aws',
+        [
+          's3',
+          'cp',
+          artifact.path,
+          `s3://${bucketName}/${s3Key}`,
+          '--metadata',
+          `version=${this.config.version},checksum=${artifact.checksum}`
+        ]
+      );
       this.log(`Uploaded ${artifact.name} to S3`);
     }
     
@@ -284,7 +294,15 @@ Download the \`.dmg\` file and drag the app to your Applications folder.
     const notesPath = path.join(this.config.outputDir, 'RELEASE_NOTES.md');
     if (fs.existsSync(notesPath)) {
       const notesS3Key = `${bucketPrefix}/v${this.config.version}/RELEASE_NOTES.md`;
-      await this.executeCommand(`aws s3 cp "${notesPath}" "s3://${bucketName}/${notesS3Key}"`);
+      await this.executeCommand(
+        'aws',
+        [
+          's3',
+          'cp',
+          notesPath,
+          `s3://${bucketName}/${notesS3Key}`
+        ]
+      );
       this.log('Uploaded release notes to S3');
     }
     
