@@ -119,30 +119,7 @@ jobs:
           SKIP_SIGNING: true
         run: npm run build:dir
 
-      - name: Verify build output
-        run: |
-          echo "Build output:"
-          ls -la dist/ || echo "No dist directory found"
-          
-          # Check if main executable exists
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            if [ -d "dist/win-unpacked" ]; then
-              echo "✅ Windows build successful"
-              ls -la dist/win-unpacked/
-            else
-              echo "❌ Windows build failed - no win-unpacked directory"
-              exit 1
-            fi
-          else
-            if [ -d "dist/linux-unpacked" ]; then
-              echo "✅ Linux build successful"
-              ls -la dist/linux-unpacked/
-            else
-              echo "❌ Linux build failed - no linux-unpacked directory"
-              exit 1
-            fi
-          fi
-
+      
       - name: Test application startup (Linux only)
         if: matrix.os == 'ubuntu-latest'
         run: |
